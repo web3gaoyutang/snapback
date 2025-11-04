@@ -1,0 +1,11 @@
+{
+  "env": {
+    "ANTHROPIC_AUTH_TOKEN": "sk-5fLBKp8ATapq417RsyNQjtOPc0UhIct7tkAQDQQ0oiksjZRf",
+    "ANTHROPIC_BASE_URL": "http://aiccdl.marspp.site",
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1"
+  },
+  "permissions": {
+    "allow": [],
+    "deny": []
+  }
+}

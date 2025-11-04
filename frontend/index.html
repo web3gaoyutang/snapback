@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>斐波那契金字塔建仓系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+        }
+
+        .input-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .input-group input {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .input-hint {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .btn-success:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(17, 153, 142, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .result-section {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .result-section.show {
+            display: block;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .info-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .info-item .label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .info-item .value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .fib-levels {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+
+        .fib-levels h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .fib-level {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 15px;
+            background: white;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            border-left: 3px solid #764ba2;
+        }
+
+        .order-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .order-table th,
+        .order-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .order-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .order-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .stage-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .stage-1 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .stage-2 {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .summary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .summary h3 {
+            margin-bottom: 15px;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .summary-item {
+            text-align: center;
+        }
+
+        .summary-item .number {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .summary-item .text {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .error {
+            background: #fee;
+            border: 2px solid #fcc;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        .success-msg {
+            background: #efe;
+            border: 2px solid #cfc;
+            color: #3c3;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .success-msg.show {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .input-section {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .order-table {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📈 斐波那契金字塔建仓系统</h1>
+            <p>基于涨停回调的智能分批建仓策略</p>
+        </div>
+
+        <div class="card">
+            <h2>策略配置</h2>
+            <div class="input-section">
+                <div class="input-group">
+                    <label for="stockCode">股票代码</label>
+                    <input type="text" id="stockCode" placeholder="例如: 600000 或 sh.600000">
+                    <span class="input-hint">支持上海(sh/6开头)和深圳(sz/0/3开头)股票</span>
+                </div>
+                <div class="input-group">
+                    <label for="totalAmount">总投资金额 (元)</label>
+                    <input type="number" id="totalAmount" placeholder="例如: 100000" min="0" step="1000">
+                    <span class="input-hint">建议至少10000元以上</span>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn btn-primary" id="analyzeBtn">🔍 分析并生成订单</button>
+                <button class="btn btn-success" id="executeBtn" disabled>✅ 执行订单</button>
+            </div>
+
+            <div class="loading" id="loading">
+                <p>⏳ 正在分析数据，请稍候...</p>
+            </div>
+
+            <div class="error" id="error"></div>
+            <div class="success-msg" id="success"></div>
+        </div>
+
+        <div class="result-section" id="resultSection">
+            <div class="card">
+                <h2>📊 分析结果</h2>
+
+                <div class="summary" id="summary">
+                    <h3>订单摘要</h3>
+                    <div class="summary-grid">
+                        <div class="summary-item">
+                            <div class="number" id="totalOrders">0</div>
+                            <div class="text">总订单数</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="number" id="stage1Orders">0</div>
+                            <div class="text">第一阶段订单</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="number" id="stage2Orders">0</div>
+                            <div class="text">第二阶段订单</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="number" id="totalAmountDisplay">¥0</div>
+                            <div class="text">总投资金额</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="label">涨停日期</div>
+                        <div class="value" id="limitUpDate">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">最高价</div>
+                        <div class="value" id="highestPrice">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">最低价</div>
+                        <div class="value" id="lowestPrice">-</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">当前价</div>
+                        <div class="value" id="currentPrice">-</div>
+                    </div>
+                </div>
+
+                <div class="fib-levels">
+                    <h3>斐波那契回调位</h3>
+                    <div id="fibLevels"></div>
+                </div>
+
+                <h3>📋 订单明细</h3>
+                <table class="order-table">
+                    <thead>
+                        <tr>
+                            <th>阶段</th>
+                            <th>订单号</th>
+                            <th>价格 (元)</th>
+                            <th>金额 (元)</th>
+                            <th>占比</th>
+                            <th>描述</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orderTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentResult = null;
+
+        document.getElementById('analyzeBtn').addEventListener('click', analyzeStock);
+        document.getElementById('executeBtn').addEventListener('click', executeOrders);
+
+        async function analyzeStock() {
+            const stockCode = document.getElementById('stockCode').value.trim();
+            const totalAmount = parseFloat(document.getElementById('totalAmount').value);
+
+            // 隐藏之前的消息
+            document.getElementById('error').classList.remove('show');
+            document.getElementById('success').classList.remove('show');
+            document.getElementById('resultSection').classList.remove('show');
+
+            // 验证输入
+            if (!stockCode) {
+                showError('请输入股票代码');
+                return;
+            }
+
+            if (!totalAmount || totalAmount <= 0) {
+                showError('请输入有效的总金额');
+                return;
+            }
+
+            // 显示加载状态
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('analyzeBtn').disabled = true;
+
+            try {
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        stock_code: stockCode,
+                        total_amount: totalAmount
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!result.success) {
+                    showError(result.message);
+                    return;
+                }
+
+                currentResult = result.data;
+                displayResult(result.data);
+                document.getElementById('executeBtn').disabled = false;
+                showSuccess('分析完成！请查看订单明细。');
+
+            } catch (error) {
+                showError('请求失败: ' + error.message);
+            } finally {
+                document.getElementById('loading').classList.remove('show');
+                document.getElementById('analyzeBtn').disabled = false;
+            }
+        }
+
+        async function executeOrders() {
+            if (!currentResult) {
+                showError('没有可执行的订单');
+                return;
+            }
+
+            if (!confirm('确定要执行这些订单吗？')) {
+                return;
+            }
+
+            document.getElementById('executeBtn').disabled = true;
+            document.getElementById('loading').classList.add('show');
+
+            try {
+                const response = await fetch('/api/execute', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        stock_code: currentResult.stock_code,
+                        orders: currentResult.orders.map(o => ({
+                            price: o.price,
+                            amount: o.amount
+                        })),
+                        account_id: '',
+                        account_key: ''
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!result.success) {
+                    showError(result.message);
+                    return;
+                }
+
+                const data = result.data;
+                showSuccess(`订单执行完成！成功: ${data.success}, 失败: ${data.failed}`);
+
+            } catch (error) {
+                showError('执行失败: ' + error.message);
+            } finally {
+                document.getElementById('loading').classList.remove('show');
+                document.getElementById('executeBtn').disabled = false;
+            }
+        }
+
+        function displayResult(data) {
+            // 显示摘要
+            document.getElementById('totalOrders').textContent = data.summary.total_orders;
+            document.getElementById('stage1Orders').textContent = data.summary.stage1_orders;
+            document.getElementById('stage2Orders').textContent = data.summary.stage2_orders;
+            document.getElementById('totalAmountDisplay').textContent = '¥' + data.total_amount.toLocaleString();
+
+            // 显示涨停信息
+            document.getElementById('limitUpDate').textContent = data.limit_up_info.limit_up_date;
+            document.getElementById('highestPrice').textContent = '¥' + data.limit_up_info.highest_price.toFixed(2);
+            document.getElementById('lowestPrice').textContent = '¥' + data.limit_up_info.lowest_price.toFixed(2);
+            document.getElementById('currentPrice').textContent = '¥' + data.limit_up_info.current_price.toFixed(2);
+
+            // 显示斐波那契回调位
+            const fibLevels = document.getElementById('fibLevels');
+            fibLevels.innerHTML = '';
+            for (const [level, price] of Object.entries(data.fibonacci_levels)) {
+                const div = document.createElement('div');
+                div.className = 'fib-level';
+                div.innerHTML = `
+                    <span><strong>${level}</strong> 回调位</span>
+                    <span><strong>¥${price.toFixed(2)}</strong></span>
+                `;
+                fibLevels.appendChild(div);
+            }
+
+            // 显示订单表格
+            const tbody = document.getElementById('orderTableBody');
+            tbody.innerHTML = '';
+            data.orders.forEach((order, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><span class="stage-badge stage-${order.stage}">阶段${order.stage}</span></td>
+                    <td>${order.order_no}</td>
+                    <td>¥${order.price.toFixed(2)}</td>
+                    <td>¥${order.amount.toLocaleString()}</td>
+                    <td>${order.percentage}%</td>
+                    <td>${order.description}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // 显示结果区域
+            document.getElementById('resultSection').classList.add('show');
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = '❌ ' + message;
+            errorDiv.classList.add('show');
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('success');
+            successDiv.textContent = '✅ ' + message;
+            successDiv.classList.add('show');
+        }
+    </script>
+</body>
+</html>

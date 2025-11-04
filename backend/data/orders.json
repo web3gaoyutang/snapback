@@ -1,0 +1,194 @@
+[
+  {
+    "order_id": "20251104090403064004",
+    "timestamp": "2025-11-04T09:04:03.064023",
+    "data": {
+      "stock_code": "sz.002029",
+      "total_amount": 1111111.0,
+      "limit_up_info": {
+        "limit_up_date": "2025-10-20",
+        "limit_up_price": 9.52,
+        "highest_price": 10.24,
+        "lowest_price": 8.64,
+        "current_price": 8.92,
+        "stock_code": "sz.002029"
+      },
+      "fibonacci_levels": {
+        "0.382": 9.6288,
+        "0.500": 9.440000000000001,
+        "0.618": 9.2512,
+        "0.700": 9.120000000000001,
+        "0.786": 8.9824
+      },
+      "orders": [
+        {
+          "stage": 1,
+          "order_no": 1,
+          "price": 9.44,
+          "amount": 155555.54,
+          "percentage": 14.0,
+          "description": "第一阶段第1单 (0.5-0.618回调区间)"
+        },
+        {
+          "stage": 1,
+          "order_no": 2,
+          "price": 9.39,
+          "amount": 155555.54,
+          "percentage": 14.0,
+          "description": "第一阶段第2单 (0.5-0.618回调区间)"
+        },
+        {
+          "stage": 1,
+          "order_no": 3,
+          "price": 9.35,
+          "amount": 155555.54,
+          "percentage": 14.0,
+          "description": "第一阶段第3单 (0.5-0.618回调区间)"
+        },
+        {
+          "stage": 1,
+          "order_no": 4,
+          "price": 9.3,
+          "amount": 155555.54,
+          "percentage": 14.0,
+          "description": "第一阶段第4单 (0.5-0.618回调区间)"
+        },
+        {
+          "stage": 1,
+          "order_no": 5,
+          "price": 9.25,
+          "amount": 155555.54,
+          "percentage": 14.0,
+          "description": "第一阶段第5单 (0.5-0.618回调区间)"
+        },
+        {
+          "stage": 2,
+          "order_no": 1,
+          "price": 9.25,
+          "amount": 111111.1,
+          "percentage": 10.0,
+          "description": "第二阶段第1单 (0.618-0.7回调区间)"
+        },
+        {
+          "stage": 2,
+          "order_no": 2,
+          "price": 9.19,
+          "amount": 111111.1,
+          "percentage": 10.0,
+          "description": "第二阶段第2单 (0.618-0.7回调区间)"
+        },
+        {
+          "stage": 2,
+          "order_no": 3,
+          "price": 9.12,
+          "amount": 111111.1,
+          "percentage": 10.0,
+          "description": "第二阶段第3单 (0.618-0.7回调区间)"
+        }
+      ],
+      "summary": {
+        "total_orders": 8,
+        "stage1_orders": 5,
+        "stage1_amount": 777777.7,
+        "stage2_orders": 3,
+        "stage2_amount": 333333.3
+      }
+    }
+  },
+  {
+    "order_id": "20251104090553499438",
+    "timestamp": "2025-11-04T09:05:53.499456",
+    "data": {
+      "stock_code": "sz.002029",
+      "total_amount": 100000.0,
+      "limit_up_info": {
+        "limit_up_date": "2025-10-20",
+        "limit_up_price": 9.52,
+        "highest_price": 10.24,
+        "lowest_price": 8.64,
+        "current_price": 8.92,
+        "stock_code": "sz.002029"
+      },
+      "fibonacci_levels": {
+        "0.382": 9.6288,
+        "0.500": 9.440000000000001,
+        "0.618": 9.2512,
+        "0.700": 9.120000000000001,
+        "0.786": 8.9824
+      },
+      "orders": [
+        {
+          "stage": 1,
+          "order_no": 1,
+          "price": 9.44,
+          "amount": 14000.0,
+          "percentage": 14.0,
+          "description": "第一阶段第1单 (0.5-0.618回调区间)"
+        },
+        {
+          "stage": 1,
+          "order_no": 2,
+          "price": 9.39,
+          "amount": 14000.0,
+          "percentage": 14.0,
+          "description": "第一阶段第2单 (0.5-0.618回调区间)"
+        },
+        {
+          "stage": 1,
+          "order_no": 3,
+          "price": 9.35,
+          "amount": 14000.0,
+          "percentage": 14.0,
+          "description": "第一阶段第3单 (0.5-0.618回调区间)"
+        },
+        {
+          "stage": 1,
+          "order_no": 4,
+          "price": 9.3,
+          "amount": 14000.0,
+          "percentage": 14.0,
+          "description": "第一阶段第4单 (0.5-0.618回调区间)"
+        },
+        {
+          "stage": 1,
+          "order_no": 5,
+          "price": 9.25,
+          "amount": 14000.0,
+          "percentage": 14.0,
+          "description": "第一阶段第5单 (0.5-0.618回调区间)"
+        },
+        {
+          "stage": 2,
+          "order_no": 1,
+          "price": 9.25,
+          "amount": 10000.0,
+          "percentage": 10.0,
+          "description": "第二阶段第1单 (0.618-0.7回调区间)"
+        },
+        {
+          "stage": 2,
+          "order_no": 2,
+          "price": 9.19,
+          "amount": 10000.0,
+          "percentage": 10.0,
+          "description": "第二阶段第2单 (0.618-0.7回调区间)"
+        },
+        {
+          "stage": 2,
+          "order_no": 3,
+          "price": 9.12,
+          "amount": 10000.0,
+          "percentage": 10.0,
+          "description": "第二阶段第3单 (0.618-0.7回调区间)"
+        }
+      ],
+      "summary": {
+        "total_orders": 8,
+        "stage1_orders": 5,
+        "stage1_amount": 70000.0,
+        "stage2_orders": 3,
+        "stage2_amount": 30000.0
+      }
+    }
+  }
+]
