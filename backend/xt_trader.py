@@ -5,32 +5,34 @@ from typing import List, Dict
 import logging
 
 logger = logging.getLogger(__name__)
-
+from xtquant.xttrader import XtQuantTrader
+from xtquant.xttype import StockAccount
+from xtquant import xtconstant
 
 class XTTraderClient:
     """XTTrader交易客户端"""
-
-    def __init__(self, account_id: str = "", account_key: str = ""):
+    def __init__(self, path: str = "", session_id: str = "", account_id: str = ""):
         """
         初始化XTTrader客户端
 
         Args:
+            path: 路径
+            session_id: 会话ID
             account_id: 账户ID
-            account_key: 账户密钥
         """
+        self.path = path
+        self.session_id = session_id
         self.account_id = account_id
-        self.account_key = account_key
         self.is_connected = False
 
         # 尝试导入xtquant，如果没有安装则使用模拟模式
         try:
-            from xtquant import xttrader
-            self.xttrader = xttrader
-            self.session_id = None
+            self.xttrader = XtQuantTrader(self.path, self.session_id)
+            self.account = StockAccount(self.account_id)
         except ImportError:
             logger.warning("xtquant未安装，使用模拟模式")
             self.xttrader = None
-            self.session_id = "MOCK_SESSION"
+            self.account = None
 
     def connect(self) -> bool:
         """
@@ -46,13 +48,15 @@ class XTTraderClient:
 
         try:
             # 实际连接逻辑
-            # self.session_id = self.xttrader.connect(...)
+            connect_result = self.xttrader.connect()
+            print(connect_result)
             self.is_connected = True
             logger.info("XTTrader连接成功")
             return True
         except Exception as e:
             logger.error(f"XTTrader连接失败: {e}")
             return False
+
 
     def place_order(
         self,
@@ -88,9 +92,10 @@ class XTTraderClient:
         try:
             # 实际下单逻辑
             # order_id = self.xttrader.order_stock(...)
+            order_id = self.xttrader.order_stock(self.account, stock_code, xtconstant.STOCK_BUY, volume, xtconstant.FIX_PRICE, price, 'strategy1', 'order_test')
             return {
                 'success': True,
-                'order_id': 'REAL_ORDER_ID',
+                'order_id': order_id,
                 'message': '订单已提交'
             }
         except Exception as e:

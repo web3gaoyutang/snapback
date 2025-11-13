@@ -36,7 +36,8 @@ MOCK_MODE = True
 
 # XTTrader账户配置（真实交易时填写）
 XT_ACCOUNT_ID = ''
-XT_ACCOUNT_KEY = ''
+XT_ACCOUNT_PATH = ''
+XT_SESSION_ID = ''
 
 ## 日志配置
 LOG_LEVEL = 'INFO'

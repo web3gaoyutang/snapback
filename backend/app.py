@@ -123,8 +123,8 @@ def execute_orders():
         data = request.json
         stock_code = data.get('stock_code', '').strip()
         orders = data.get('orders', [])
-        account_id = data.get('account_id', '').strip()
-        account_key = data.get('account_key', '').strip()
+        # account_id = data.get('account_id', '').strip()
+        # account_key = data.get('account_key', '').strip()
 
         if not stock_code or not orders:
             return jsonify({
@@ -136,7 +136,7 @@ def execute_orders():
 
         # 初始化交易客户端
         if trader is None or not trader.is_connected:
-            trader = XTTraderClient(account_id, account_key)
+            trader = XTTraderClient(config.XT_ACCOUNT_PATH, config.XT_SESSION_ID, config.XT_ACCOUNT_ID)
             if not trader.connect():
                 return jsonify({
                     'success': False,
