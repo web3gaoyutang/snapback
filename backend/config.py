@@ -35,9 +35,8 @@ PYRAMID_CONFIG = {
 MOCK_MODE = True
 
 # XTTrader账户配置（真实交易时填写）
-XT_ACCOUNT_ID = ''
-XT_ACCOUNT_PATH = ''
-XT_SESSION_ID = ''
+XT_ACCOUNT_ID = '090000014536'
+XT_ACCOUNT_PATH = 'D:\\华宝证券QMT实盘交易端 - yh\\userdata_mini'
 
 ## 日志配置
 LOG_LEVEL = 'INFO'
