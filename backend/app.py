@@ -136,7 +136,7 @@ def execute_orders():
 
         # 初始化交易客户端
         if trader is None or not trader.is_connected:
-            trader = XTTraderClient(config.XT_ACCOUNT_PATH, config.XT_SESSION_ID, config.XT_ACCOUNT_ID)
+            trader = XTTraderClient(config.XT_ACCOUNT_PATH, config.XT_ACCOUNT_ID)
             if not trader.connect():
                 return jsonify({
                     'success': False,

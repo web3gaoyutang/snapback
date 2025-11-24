@@ -5,13 +5,71 @@ from typing import List, Dict
 import logging
 
 logger = logging.getLogger(__name__)
-from xtquant.xttrader import XtQuantTrader
+
+from xtquant.xttrader import XtQuantTrader,XtQuantTraderCallback
 from xtquant.xttype import StockAccount
 from xtquant import xtconstant
+import time
+
+
+class MyXtQuantTraderCallback(XtQuantTraderCallback):
+    def on_disconnected(self):
+        """
+        连接断开
+        :return:
+        """
+        print("connection lost")
+    def on_stock_order(self, order):
+        """
+        委托回报推送
+        :param order: XtOrder对象
+        :return:
+        """
+        print("on order callback:")
+        print(order.stock_code, order.order_status, order.order_sysid)
+    def on_stock_trade(self, trade):
+        """
+        成交变动推送
+        :param trade: XtTrade对象
+        :return:
+        """
+        print("on trade callback")
+        print(trade.account_id, trade.stock_code, trade.order_id)
+    def on_order_error(self, order_error):
+        """
+        委托失败推送
+        :param order_error:XtOrderError 对象
+        :return:
+        """
+        print("on order_error callback")
+        print(order_error.order_id, order_error.error_id, order_error.error_msg)
+    def on_cancel_error(self, cancel_error):
+        """
+        撤单失败推送
+        :param cancel_error: XtCancelError 对象
+        :return:
+        """
+        print("on cancel_error callback")
+        print(cancel_error.order_id, cancel_error.error_id, cancel_error.error_msg)
+    def on_order_stock_async_response(self, response):
+        """
+        异步下单回报推送
+        :param response: XtOrderResponse 对象
+        :return:
+        """
+        print("on_order_stock_async_response")
+        print(response.account_id, response.order_id, response.seq)
+    def on_account_status(self, status):
+        """
+        :param response: XtAccountStatus 对象
+        :return:
+        """
+        print("on_account_status")
+        print(status.account_id, status.account_type, status.status)
 
 class XTTraderClient:
     """XTTrader交易客户端"""
-    def __init__(self, path: str = "", session_id: str = "", account_id: str = ""):
+    def __init__(self, path: str = "", account_id: str = ""):
         """
         初始化XTTrader客户端
 
@@ -21,7 +79,7 @@ class XTTraderClient:
             account_id: 账户ID
         """
         self.path = path
-        self.session_id = session_id
+        self.session_id = int(time.time())
         self.account_id = account_id
         self.is_connected = False
 
@@ -29,6 +87,8 @@ class XTTraderClient:
         try:
             self.xttrader = XtQuantTrader(self.path, self.session_id)
             self.account = StockAccount(self.account_id)
+            self.callback = MyXtQuantTraderCallback()
+            self.xttrader.register_callback(self.callback)
         except ImportError:
             logger.warning("xtquant未安装，使用模拟模式")
             self.xttrader = None
@@ -48,9 +108,16 @@ class XTTraderClient:
 
         try:
             # 实际连接逻辑
+            self.xttrader.start()
             connect_result = self.xttrader.connect()
-            print(connect_result)
+            if connect_result != 0:
+                logger.error(f"XTTrader连接失败: {connect_result}")
+                return False
             self.is_connected = True
+            subscribe_result = self.xttrader.subscribe(self.account)
+            if subscribe_result != 0:
+                logger.error(f"XTTrader订阅失败: {subscribe_result}")
+                return False
             logger.info("XTTrader连接成功")
             return True
         except Exception as e:
@@ -91,7 +158,6 @@ class XTTraderClient:
 
         try:
             # 实际下单逻辑
-            # order_id = self.xttrader.order_stock(...)
             order_id = self.xttrader.order_stock(self.account, stock_code, xtconstant.STOCK_BUY, volume, xtconstant.FIX_PRICE, price, 'strategy1', 'order_test')
             return {
                 'success': True,
@@ -163,10 +229,13 @@ class XTTraderClient:
 if __name__ == '__main__':
     # 测试代码
     logging.basicConfig(level=logging.INFO)
-    client = XTTraderClient()
+    import time
+    client = XTTraderClient(
+        path="D:\\华宝证券QMT实盘交易端 - yh\\userdata_mini",session_id=int(time.time()),account_id='090000014536'
+    )
     client.connect()
 
-    result = client.place_order('sh.600000', 10.5, 1000)
+    result = client.place_order('301591.SH', 41.47, 200)
     print(result)
 
     client.disconnect()
