@@ -319,6 +319,8 @@ class XTTraderClient:
 
         # 实际下单
         try:
+            if len(stock_code.split('.')) == 2:
+                stock_code = stock_code.split('.')[1] + '.' + stock_code.split('.')[0]
             order_id = self.xttrader.order_stock(
                 self.account,
                 stock_code,
