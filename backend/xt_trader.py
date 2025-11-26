@@ -5,6 +5,8 @@ from typing import List, Dict, Optional, Any
 import logging
 import time
 import threading
+from datetime import datetime, timedelta
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -814,6 +816,167 @@ class XTTraderClient:
         except Exception as e:
             logger.error(f"查询持仓失败: {e}", exc_info=True)
             return None
+
+    def check_and_save_pending_orders(self, save_path: str = "pending_orders.json") -> List[Dict[str, Any]]:
+        """
+        收盘前3分钟检查未成交订单并保存
+        
+        Args:
+            save_path: 保存文件路径
+            
+        Returns:
+            保存的未成交订单列表
+        """
+        from backend.utils import (
+            is_trading_day, get_market_close_time, save_pending_orders
+        )
+        
+        now = datetime.now()
+        
+        # 检查是否是交易日
+        if not is_trading_day(now):
+            logger.info("非交易日，跳过检查")
+            return []
+        
+        # 检查是否在收盘前3分钟
+        close_time = get_market_close_time(now)
+        check_time = close_time - timedelta(minutes=3)
+        
+        if now < check_time:
+            logger.info(f"还未到检查时间（收盘前3分钟），当前时间: {now.strftime('%H:%M:%S')}")
+            return []
+        
+        if now > close_time:
+            logger.info("已过收盘时间，跳过检查")
+            return []
+        
+        logger.info("开始检查未成交订单...")
+        
+        # 查询所有订单
+        all_orders = self.query_orders()
+        
+        # 筛选未成交的订单（状态为部分成交或未成交）
+        # 注意：需要根据实际的order_status值来判断，这里假设非完全成交的订单需要重新下单
+        pending_orders = []
+        
+        for order in all_orders:
+            order_status = order.get('order_status')
+            # 根据XTTrader的订单状态，通常：
+            # 0=未报, 1=待报, 2=已报, 3=部成, 4=部撤, 5=已撤, 6=已成, 7=废单
+            # 这里保存状态为2(已报)、3(部成)的订单，表示还在委托中
+            if order_status in [2, 3]:
+                # 保存订单信息用于重新下单
+                pending_order = {
+                    'stock_code': order['stock_code'],
+                    'price': order['price'],
+                    'volume': order['order_volume'],
+                    'original_order_id': order['order_id'],
+                    'order_status': order_status,
+                    'save_time': now.isoformat()
+                }
+                pending_orders.append(pending_order)
+        
+        # 保存到文件
+        if pending_orders:
+            if save_pending_orders(pending_orders, save_path):
+                logger.info(f"已保存 {len(pending_orders)} 个未成交订单到 {save_path}")
+            else:
+                logger.error(f"保存未成交订单失败")
+        else:
+            logger.info("没有未成交的订单需要保存")
+        
+        return pending_orders
+
+    def reload_pending_orders(self, save_path: str = "pending_orders.json") -> List[Dict[str, Any]]:
+        """
+        次交易日开盘后3分钟自动重新下单
+        
+        Args:
+            save_path: 保存文件路径
+            
+        Returns:
+            重新下单的结果列表
+        """
+        from backend.utils import (
+            is_trading_day, get_market_open_time, get_next_trading_day,
+            load_pending_orders, clear_pending_orders
+        )
+        
+        now = datetime.now()
+        
+        # 检查是否是交易日
+        if not is_trading_day(now):
+            logger.info("非交易日，跳过重新下单")
+            return []
+        
+        # 检查是否在开盘后3分钟
+        open_time = get_market_open_time(now)
+        reload_time = open_time + timedelta(minutes=3)
+        
+        if now < reload_time:
+            logger.info(f"还未到重新下单时间（开盘后3分钟），当前时间: {now.strftime('%H:%M:%S')}")
+            return []
+        
+        # 检查是否在开盘后10分钟内（避免重复执行）
+        if now > open_time + timedelta(minutes=10):
+            logger.info("已过重新下单时间窗口，跳过")
+            return []
+        
+        logger.info("开始重新下单...")
+        
+        # 加载保存的订单
+        pending_orders = load_pending_orders(save_path)
+        
+        if not pending_orders:
+            logger.info("没有待重新下单的订单")
+            return []
+        
+        logger.info(f"找到 {len(pending_orders)} 个待重新下单的订单")
+        
+        results = []
+        
+        for order_info in pending_orders:
+            try:
+                stock_code = order_info['stock_code']
+                price = order_info['price']
+                volume = order_info['volume']
+                original_order_id = order_info.get('original_order_id')
+                
+                # 重新下单
+                result = self.place_order(
+                    stock_code=stock_code,
+                    price=price,
+                    volume=volume,
+                    direction="buy",  # 默认买入，可以根据需要调整
+                    remark=f"重新下单-原订单:{original_order_id}"
+                )
+                
+                results.append({
+                    'original_order': order_info,
+                    'new_order_result': result
+                })
+                
+                if result['success']:
+                    logger.info(f"重新下单成功: {stock_code}, 价格: {price}, 数量: {volume}, 新订单ID: {result['order_id']}")
+                else:
+                    logger.error(f"重新下单失败: {stock_code}, 原因: {result['message']}")
+                
+            except Exception as e:
+                logger.error(f"处理订单时出错: {e}", exc_info=True)
+                results.append({
+                    'original_order': order_info,
+                    'new_order_result': {
+                        'success': False,
+                        'message': f'处理异常: {str(e)}'
+                    }
+                })
+        
+        # 清除已处理的订单文件
+        if results:
+            clear_pending_orders(save_path)
+            logger.info("已清除已处理的订单文件")
+        
+        return results
 
     def run_forever(self):
         """
